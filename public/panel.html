@@ -64,7 +64,7 @@
             <div class="card">
                 <h3>Local</h3>
                 <input type="text" id="homeName" maxlength="3" placeholder="Siglas (RAC)" style="font-weight: bold; text-align: center; font-size: 20px;">
-                <input type="text" id="homeFullName" placeholder="Nombre Completo">
+                <input type="text" id="homeFullName" placeholder="Nombre Completo (Ej: RACING)">
                 
                 <label style="font-size: 14px; color: #94a3b8;">Subir Logo (PNG):</label>
                 <input type="file" id="homeLogoFile" accept="image/png">
@@ -77,7 +77,7 @@
                     <button class="btn-action bg-green" onclick="changeScore('home', 1)">⚽ +1 GOL</button>
                 </div>
                 <div class="cards-box">
-                    <span style="font-size: 20px;">🟥</span> 
+                    <span style="font-size: 20px;">🟥 ROJAS</span> 
                     <button class="btn-action bg-gray" style="flex: 0; padding: 5px 15px;" onclick="changeCards('home', -1)">-</button>
                     <span class="card-num" id="homeRedsDisplay">0</span>
                     <button class="btn-action bg-red" style="flex: 0; padding: 5px 15px;" onclick="changeCards('home', 1)">+</button>
@@ -87,7 +87,7 @@
             <div class="card">
                 <h3>Visitante</h3>
                 <input type="text" id="awayName" maxlength="3" placeholder="Siglas (VIS)" style="font-weight: bold; text-align: center; font-size: 20px;">
-                <input type="text" id="awayFullName" placeholder="Nombre Completo">
+                <input type="text" id="awayFullName" placeholder="Nombre Completo (Ej: AMÉRICA)">
                 
                 <label style="font-size: 14px; color: #94a3b8;">Subir Logo (PNG):</label>
                 <input type="file" id="awayLogoFile" accept="image/png">
@@ -100,7 +100,7 @@
                     <button class="btn-action bg-green" onclick="changeScore('away', 1)">⚽ +1 GOL</button>
                 </div>
                 <div class="cards-box">
-                    <span style="font-size: 20px;">🟥</span> 
+                    <span style="font-size: 20px;">🟥 ROJAS</span> 
                     <button class="btn-action bg-gray" style="flex: 0; padding: 5px 15px;" onclick="changeCards('away', -1)">-</button>
                     <span class="card-num" id="awayRedsDisplay">0</span>
                     <button class="btn-action bg-red" style="flex: 0; padding: 5px 15px;" onclick="changeCards('away', 1)">+</button>
@@ -166,7 +166,6 @@
         let homeLogoBase64 = '';
         let awayLogoBase64 = '';
 
-        // Lectores de Archivos
         document.getElementById('homeLogoFile').addEventListener('change', function(e) {
             const reader = new FileReader();
             reader.onload = function(event) { homeLogoBase64 = event.target.result; };
