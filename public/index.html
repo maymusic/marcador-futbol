@@ -11,22 +11,19 @@
         .contenedor-relativo { position: absolute; top: 20px; left: 60px; display: inline-flex; flex-direction: column; }
         .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; position: relative;}
         
-        /* Ajustado a 75px para alinear perfectamente con el cronómetro */
         .bloque-marcador { display: flex; align-items: stretch; height: 75px; background: linear-gradient(180deg, var(--color-global) 0%, #000000 100%); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
         .equipo-lado { display: flex; align-items: center; padding: 0 25px; background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent); }
         
-        /* Escudos más grandes y estilizados */
         .logo { height: 50px; width: 50px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
         .info-equipo { display: flex; flex-direction: column; justify-content: center; line-height: 1; margin: 0 15px; }
-        
-        /* Nombre de las siglas más grande y con más impacto */
         .nombre-siglas { font-size: 34px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 2px 3px 5px rgba(0,0,0,0.9); }
         
-        /* Contador de goles gigante y profesional */
         .puntuacion { padding: 0 30px; font-size: 46px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 45px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); transition: all 0.5s ease; position: relative; font-variant-numeric: tabular-nums; }
         
         .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 25px; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; }
-        .caja-agregado { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 2px 15px; font-size: 22px; font-weight: bold; border-radius: 0 0 8px 8px; box-shadow: 0 5px 10px rgba(0,0,0,0.5); display: none; border: 1px solid #900; border-top: none; }
+        
+        /* TIEMPO EXTRA AGRANDADO Y CORREGIDO */
+        .caja-agregado { position: absolute; bottom: -38px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 4px 22px; font-size: 28px; font-weight: 900; border-radius: 0 0 8px 8px; box-shadow: 0 8px 15px rgba(0,0,0,0.5); display: none; border: 2px solid #b02a37; border-top: none; letter-spacing: 1px; text-shadow: 1px 2px 4px rgba(0,0,0,0.6); z-index: 11; }
         
         .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 5px; }
         .tarjeta.roja { width: 12px; height: 8px; background-color: #ff0000; border-radius: 2px; box-shadow: 0 0 5px red; animation: latido 1.5s infinite; border: 1px solid darkred;}
@@ -45,8 +42,8 @@
         .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
         .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
         
-        /* Ajustado el espaciado para que no choque con la nueva altura */
-        .grafico-sustitucion { position: absolute; top: 100px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
+        /* Separado a 115px para dar espacio limpio al tiempo extra grande */
+        .grafico-sustitucion { position: absolute; top: 115px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
         .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
         .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 25px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); width: 80px; }
         .sub-cuerpo { display: flex; align-items: center; background: rgba(255,255,255,0.95); color: #111; padding: 5px 20px; }
