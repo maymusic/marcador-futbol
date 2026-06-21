@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Producción - Marcador</title>
+    <style>
+        :root { --bg-color: #0f172a; --card-bg: #1e293b; --text: #f8fafc; --accent: #3b82f6; --success: #22c55e; --danger: #ef4444; --warning: #eab308; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 100%; max-width: 900px; }
+        .header-title { text-align: center; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; color: #cbd5e1; }
+        
+        .master-toggle { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
+        .btn-toggle { padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; transition: 0.3s; color: white; width: 45%; }
+        .btn-on { background-color: var(--success); box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
+        .btn-off { background-color: #64748b; }
+        .status-indicator { font-size: 18px; font-weight: bold; padding: 10px 20px; border-radius: 6px; background: #000;}
+        .status-on { color: var(--success); border: 1px solid var(--success);}
+        .status-off { color: #94a3b8; border: 1px solid #475569;}
+
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        
+        h3 { margin-top: 0; text-align: center; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;}
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px;}
+        input[type="color"] { width: 100%; height: 45px; border: none; border-radius: 6px; cursor: pointer; background: transparent; margin-bottom: 12px;}
+        
+        .score-display { font-size: 70px; font-weight: bold; text-align: center; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 15px rgba(255,255,255,0.1);}
+        button { cursor: pointer; border: none; color: white; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .btn-row { display: flex; gap: 10px; margin-bottom: 15px;}
+        .btn-action { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px;}
+        .bg-red { background-color: var(--danger); } .bg-green { background-color: var(--success); } .bg-blue { background-color: var(--accent); } .bg-yellow { background-color: var(--warning); color: black;} .bg-gray { background-color: #475569; }
+
+        .update-global-btn { width: 100%; padding: 18px; font-size: 18px; font-weight: bold; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);}
+
+        .cards-box { display: flex; justify-content: center; align-items: center; gap: 15px; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155;}
+        .card-num { font-size: 22px; font-weight: bold; width: 30px; text-align: center;}
+        
+        .timer-display { font-size: 50px; font-weight: bold; text-align: center; margin-bottom: 20px; font-variant-numeric: tabular-nums;}
+        .flex-center { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .timer-adjust { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #334155;}
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h2 class="header-title">💻 DASHBOARD DE TRANSMISIÓN</h2>
+
+        <div class="master-toggle">
+            <div style="width: 45%;">
+                <label style="font-weight: bold; color: #94a3b8; display: block; margin-bottom: 5px;">🎨 Color Global</label>
+                <input type="color" id="mainColor" value="#1a1a2e" style="height: 50px; margin: 0;">
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; width: 45%;">
+                <span id="onAirStatus" class="status-indicator status-on">EN PANTALLA 🟢</span>
+                <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+                    <button class="btn-toggle btn-off" id="btnOcultar" onclick="toggleScoreboard(false)">🙈 Ocultar</button>
+                    <button class="btn-toggle btn-on" id="btnMostrar" onclick="toggleScoreboard(true)">👁️ Mostrar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Local</h3>
+                <input type="text" id="homeName" maxlength="3" placeholder="Siglas (RAC)" style="font-weight: bold; text-align: center; font-size: 20px;">
+                <input type="text" id="homeFullName" placeholder="Nombre Completo">
+                <input type="text" id="homeLogo" placeholder="Logo (rac.png)">
+                <input type="color" id="homeColor" value="#0044cc">
+                
+                <div class="score-display" id="homeScoreDisplay">0</div>
+                <div class="btn-row">
+                    <button class="btn-action bg-red" onclick="changeScore('home', -1)">-1</button>
+                    <button class="btn-action bg-green" onclick="changeScore('home', 1)">⚽ +1 GOL</button>
+                </div>
+                <div class="cards-box">
+                    <span style="font-size: 20px;">🟥</span> 
+                    <button class="btn-action bg-gray" style="flex: 0; padding: 5px 15px;" onclick="changeCards('home', -1)">-</button>
+                    <span class="card-num" id="homeRedsDisplay">0</span>
+                    <button class="btn-action bg-red" style="flex: 0; padding: 5px 15px;" onclick="changeCards('home', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Visitante</h3>
+                <input type="text" id="awayName" maxlength="3" placeholder="Siglas (VIS)" style="font-weight: bold; text-align: center; font-size: 20px;">
+                <input type="text" id="awayFullName" placeholder="Nombre Completo">
+                <input type="text" id="awayLogo" placeholder="Logo (vis.png)">
+                <input type="color" id="awayColor" value="#cc0000">
+                
+                <div class="score-display" id="awayScoreDisplay">0</div>
+                <div class="btn-row">
+                    <button class="btn-action bg-red" onclick="changeScore('away', -1)">-1</button>
+                    <button class="btn-action bg-green" onclick="changeScore('away', 1)">⚽ +1 GOL</button>
+                </div>
+                <div class="cards-box">
+                    <span style="font-size: 20px;">🟥</span> 
+                    <button class="btn-action bg-gray" style="flex: 0; padding: 5px 15px;" onclick="changeCards('away', -1)">-</button>
+                    <span class="card-num" id="awayRedsDisplay">0</span>
+                    <button class="btn-action bg-red" style="flex: 0; padding: 5px 15px;" onclick="changeCards('away', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="update-global-btn" onclick="updateTeamInfo()">💾 GUARDAR INFO Y ENVIAR A PANTALLA</button>
+
+        <div class="card" style="margin-top: 25px;">
+            <h3>⏱️ Reloj del Partido</h3>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+            <div class="btn-row">
+                <button class="btn-action bg-blue" onclick="timerAction('start')">▶ INICIAR</button>
+                <button class="btn-action bg-yellow" onclick="timerAction('pause')">⏸ PAUSA</button>
+                <button class="btn-action bg-gray" onclick="timerAction('reset')">⏹ RESET</button>
+            </div>
+            <div class="grid-2">
+                <div class="timer-adjust">
+                    <label style="color: #94a3b8; font-size: 14px;">Ajustar Minuto Exacto:</label>
+                    <div class="flex-center" style="margin-top: 5px;">
+                        <input type="number" id="manualMinute" value="45" min="0" style="margin:0;">
+                        <button class="btn-action bg-blue" style="margin:0;" onclick="setManualTime()">Aplicar</button>
+                    </div>
+                </div>
+                <div class="timer-adjust" style="border-color: #ef4444;">
+                    <label style="color: #ef4444; font-size: 14px; font-weight: bold;">Tiempo Agregado:</label>
+                    <div class="flex-center" style="margin-top: 5px;">
+                        <input type="number" id="addedTime" value="0" min="0" style="margin:0;">
+                        <button class="btn-action bg-red" style="margin:0;" onclick="setAddedTime()">Mostrar +</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🔄 Sustituciones</h3>
+            <select id="subTeamSelect" style="text-align: center; font-weight: bold;">
+                <option value="home">EQUIPO LOCAL</option>
+                <option value="away">EQUIPO VISITANTE</option>
+            </select>
+            <div class="grid-2" style="margin-top: 15px;">
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <h4 style="color: #ef4444; margin: 0 0 10px 0; text-align: center;">⬇ SALE DE CANCHA</h4>
+                    <input type="text" id="outPlayerNumber" placeholder="Dorsal (Ej: 10)">
+                    <input type="text" id="outPlayerName" placeholder="Apellido (Ej: PÉREZ)">
+                </div>
+                <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                    <h4 style="color: #22c55e; margin: 0 0 10px 0; text-align: center;">⬆ ENTRA A CANCHA</h4>
+                    <input type="text" id="inPlayerNumber" placeholder="Dorsal (Ej: 9)">
+                    <input type="text" id="inPlayerName" placeholder="Apellido (Ej: GÓMEZ)">
+                </div>
+            </div>
+            <button class="btn-action bg-blue" style="width: 100%; margin-top: 15px; padding: 15px;" onclick="launchSubstitution()">LANZAR GRÁFICO DE CAMBIO</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentState = { homeScore: 0, awayScore: 0, homeReds: 0, awayReds: 0 };
+        let primeraCarga = true;
+
+        socket.on('stateUpdate', (state) => {
+            currentState = state;
+            
+            // Actualizar Marcador Numérico SIEMPRE
+            document.getElementById('homeScoreDisplay').innerText = state.homeScore;
+            document.getElementById('awayScoreDisplay').innerText = state.awayScore;
+            document.getElementById('homeRedsDisplay').innerText = state.homeReds;
+            document.getElementById('awayRedsDisplay').innerText = state.awayReds;
+
+            // Mostrar/Ocultar Indicador
+            const statusIndicator = document.getElementById('onAirStatus');
+            if (state.showScoreboard) {
+                statusIndicator.innerText = "EN PANTALLA 🟢"; statusIndicator.className = "status-indicator status-on";
+            } else {
+                statusIndicator.innerText = "OCULTO 🔴"; statusIndicator.className = "status-indicator status-off";
+            }
+
+            // SOLO actualizamos las cajas de texto en la primera carga para no borrarte lo que escribes
+            if (primeraCarga) {
+                document.getElementById('homeName').value = state.homeName || '';
+                document.getElementById('homeFullName').value = state.homeFullName || '';
+                document.getElementById('awayName').value = state.awayName || '';
+                document.getElementById('awayFullName').value = state.awayFullName || '';
+                document.getElementById('homeLogo').value = state.homeLogo || '';
+                document.getElementById('awayLogo').value = state.awayLogo || '';
+                try { document.getElementById('mainColor').value = state.mainColor || '#1a1a2e'; } catch(e){}
+                try { document.getElementById('homeColor').value = state.homeColor || '#0044cc'; } catch(e){}
+                try { document.getElementById('awayColor').value = state.awayColor || '#cc0000'; } catch(e){}
+                primeraCarga = false;
+            }
+        });
+
+        socket.on('updateTimer', (time) => {
+            const m = String(time.minutes).padStart(2, '0');
+            const s = String(time.seconds).padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        });
+
+        function toggleScoreboard(isVisible) { socket.emit('toggleScoreboard', isVisible); }
+
+        function changeScore(team, amount) {
+            if (team === 'home') currentState.homeScore = Math.max(0, currentState.homeScore + amount);
+            if (team === 'away') currentState.awayScore = Math.max(0, currentState.awayScore + amount);
+            socket.emit('updateScore', { homeScore: currentState.homeScore, awayScore: currentState.awayScore });
+        }
+
+        function changeCards(team, amount) {
+            if(team === 'home') currentState.homeReds = Math.max(0, currentState.homeReds + amount);
+            if(team === 'away') currentState.awayReds = Math.max(0, currentState.awayReds + amount);
+            socket.emit('updateCards', { homeReds: currentState.homeReds, awayReds: currentState.awayReds });
+        }
+
+        function updateTeamInfo() {
+            socket.emit('updateTeamInfo', {
+                mainColor: document.getElementById('mainColor').value,
+                homeName: document.getElementById('homeName').value.toUpperCase().slice(0, 3),
+                homeFullName: document.getElementById('homeFullName').value.toUpperCase(),
+                awayName: document.getElementById('awayName').value.toUpperCase().slice(0, 3),
+                awayFullName: document.getElementById('awayFullName').value.toUpperCase(),
+                homeLogo: document.getElementById('homeLogo').value,
+                awayLogo: document.getElementById('awayLogo').value,
+                homeColor: document.getElementById('homeColor').value,
+                awayColor: document.getElementById('awayColor').value
+            });
+        }
+
+        function timerAction(action) { socket.emit('timerControl', { action }); }
+        function setManualTime() { socket.emit('timerControl', { action: 'set', minutes: parseInt(document.getElementById('manualMinute').value) }); }
+        function setAddedTime() { socket.emit('updateAddedTime', parseInt(document.getElementById('addedTime').value)); }
+
+        function launchSubstitution() {
+            socket.emit('triggerSubstitution', {
+                team: document.getElementById('subTeamSelect').value,
+                outNumber: document.getElementById('outPlayerNumber').value,
+                outName: document.getElementById('outPlayerName').value.toUpperCase(),
+                inNumber: document.getElementById('inPlayerNumber').value,
+                inName: document.getElementById('inPlayerName').value.toUpperCase()
+            });
+            document.getElementById('outPlayerNumber').value = ''; document.getElementById('outPlayerName').value = '';
+            document.getElementById('inPlayerNumber').value = ''; document.getElementById('inPlayerName').value = '';
+        }
+    </script>
+</body>
+</html>
