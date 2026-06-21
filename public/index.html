@@ -5,301 +5,142 @@
     <title>Gráfico de Marcador Premium</title>
     <style>
         :root { --color-global: #1a1a2e; }
-
         body { margin: 0; padding: 0; background-color: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
         
         #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); }
         #master-visibility-container.oculto { opacity: 0; transform: translateY(-150px); }
 
-        .contenedor-relativo { position: absolute; top: 40px; left: 60px; display: inline-flex; flex-direction: column; }
-        
-        .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; }
+        .contenedor-relativo { position: absolute; top: 20px; left: 60px; display: inline-flex; flex-direction: column; }
+        .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; position: relative;}
 
         .bloque-marcador { display: flex; align-items: stretch; height: 60px; background: linear-gradient(180deg, var(--color-global) 0%, #000000 100%); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
         .equipo-lado { display: flex; align-items: center; padding: 0 20px; background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent); }
         .logo { height: 40px; width: 40px; object-fit: contain; }
         .info-equipo { display: flex; flex-direction: column; justify-content: center; line-height: 1; margin: 0 10px; }
         .nombre-siglas { font-size: 26px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        
-        .puntuacion { padding: 0 25px; font-size: 34px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 35px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5); transition: all 0.5s ease; position: relative; }
+        .puntuacion { padding: 0 25px; font-size: 34px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 35px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
 
         .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 25px; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; }
         .caja-agregado { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 2px 15px; font-size: 22px; font-weight: bold; border-radius: 0 0 8px 8px; box-shadow: 0 5px 10px rgba(0,0,0,0.5); display: none; border: 1px solid #900; border-top: none; }
 
         .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 3px; }
-        .tarjeta.roja { width: 12px; height: 8px; background-color: #ff0000; border-radius: 2px; box-shadow: 0 0 5px red; animation: latido 1.5s infinite; border: 1px solid darkred;}
-        @keyframes latido { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7;} 100% { transform: scale(1); opacity: 1; } }
+        .tarjeta.roja { width: 12px; height: 8px; background-color: #ff0000; border-radius: 2px; box-shadow: 0 0 5px red; border: 1px solid darkred;}
 
-        @keyframes brilloGol { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.4); filter: brightness(2.5); text-shadow: 0 0 25px white; } 100% { transform: scale(1); filter: brightness(1); } }
-        .animacion-gol { animation: brilloGol 0.8s ease-in-out; }
+        .letrero-gol { position: absolute; top: 60px; padding: 6px 20px; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-top: none; opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 5; }
+        .letrero-gol.mostrar { opacity: 1; visibility: visible; transform: translateY(5px); }
+        .letrero-gol.lado-local { left: 20px; background: linear-gradient(90deg, var(--color-global) 0%, #111 100%);}
+        .letrero-gol.lado-visitante { right: 20px; flex-direction: row; background: linear-gradient(270deg, var(--color-global) 0%, #111 100%);}
+        .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; color: #fff;}
+        .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; }
 
-        /* LETRERO DE GOL (Corregido y empujado hacia abajo) */
-        .letrero-gol { 
-            position: absolute; 
-            top: 70px; /* Basa más abajo para que no lo tape el marcador principal */
-            padding: 6px 20px; border-radius: 0 0 10px 10px; 
-            display: flex; align-items: center; gap: 15px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-top: none; 
-            opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            z-index: 5; 
-        }
-        
-        .letrero-gol.mostrar { opacity: 1; visibility: visible; }
-        
-        .letrero-gol.lado-local { 
-            left: 20px; right: auto;
-            background: linear-gradient(90deg, var(--color-global) 0%, #111 100%);
-        }
-        .letrero-gol.lado-local.mostrar { transform: translateY(15px); } 
-        .letrero-gol.lado-local:not(.mostrar) { transform: translateY(-50px); }
-        
-        /* FIX DEL LADO VISITANTE (Ya no se lee al revés) */
-        .letrero-gol.lado-visitante { 
-            right: 20px; left: auto;
-            flex-direction: row; /* Quitado el row-reverse */
-            background: linear-gradient(270deg, var(--color-global) 0%, #111 100%);
-        }
-        .letrero-gol.lado-visitante.mostrar { transform: translateY(15px); }
-        .letrero-gol.lado-visitante:not(.mostrar) { transform: translateY(-50px); }
-
-        .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
-        .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
-
-        /* SUSTITUCIONES */
-        .grafico-sustitucion { position: absolute; top: 145px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
+        /* SUSTITUCIONES: Ahora top es 65px para estar pegado justo debajo */
+        .grafico-sustitucion { position: absolute; top: 65px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 0 0 8px 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 4; }
         .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
-        .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 25px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); width: 80px; }
+        .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 15px; background: rgba(0,0,0,0.3); width: 60px; }
+        .sub-header img { height: 35px; width: auto; object-fit: contain;}
         .sub-cuerpo { display: flex; align-items: center; background: rgba(255,255,255,0.95); color: #111; padding: 5px 20px; }
-        .sub-jugador { display: flex; align-items: center; padding: 5px 10px; font-size: 20px; font-weight: 900; letter-spacing: 0.5px;}
-        .sub-icono { font-size: 18px; margin-right: 8px; }
-        .sub-sale .sub-icono { color: #dc3545; }
-        .sub-entra .sub-icono { color: #28a745; }
-        .sub-numero { background: #111; color: white; padding: 4px 10px; border-radius: 4px; margin-right: 12px; font-size: 18px; text-align: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);}
-        .sub-separador { width: 2px; height: 35px; background: linear-gradient(180deg, transparent, #ccc, transparent); margin: 0 15px; }
+        .sub-jugador { display: flex; align-items: center; padding: 5px 10px; font-size: 18px; font-weight: 900; }
+        .sub-numero { background: #111; color: white; padding: 2px 8px; border-radius: 4px; margin-right: 8px; font-size: 16px; }
+        .sub-separador { width: 2px; height: 30px; background: #ccc; margin: 0 15px; }
 
-        /* CANVAS DE CONFETTI */
         #confetti-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; }
     </style>
 </head>
 <body>
-
     <canvas id="confetti-canvas"></canvas>
-
     <div id="master-visibility-container">
         <div class="contenedor-relativo">
-            
             <div class="bloque-principal">
                 <div class="bloque-marcador" style="border-radius: 12px 0 0 12px;">
                     <div class="equipo-lado">
-                        <img id="logoLocalImg" class="logo" src="logos/rac.png" onerror="this.style.display='none'">
-                        <div class="info-equipo">
-                            <span id="nombreLocal" class="nombre-siglas">RAC</span>
-                            <div id="tarjetasLocal" class="contenedor-tarjetas"></div>
-                        </div>
+                        <img id="logoLocalImg" class="logo" src="" onerror="this.style.display='none'">
+                        <div class="info-equipo"><span id="nombreLocal" class="nombre-siglas">RAC</span><div id="tarjetasLocal" class="contenedor-tarjetas"></div></div>
                     </div>
                     <div class="puntuacion" id="cajaPuntosLocal"><span id="puntosLocal">0</span></div>
                 </div>
-
                 <div style="position: relative;">
                     <div class="cronometro-caja" id="cronometro">00:00</div>
                     <div class="caja-agregado" id="tiempoAgregado">+0</div>
                 </div>
-
                 <div class="bloque-marcador" style="border-radius: 0 12px 12px 0;">
                     <div class="puntuacion" id="cajaPuntosVisitante"><span id="puntosVisitante">0</span></div>
                     <div class="equipo-lado" style="flex-direction: row-reverse;">
-                        <img id="logoVisitanteImg" class="logo" src="logos/default.png" onerror="this.style.display='none'">
-                        <div class="info-equipo" style="align-items: flex-end;">
-                            <span id="nombreVisitante" class="nombre-siglas">VIS</span>
-                            <div id="tarjetasVisitante" class="contenedor-tarjetas" style="justify-content: flex-end;"></div>
-                        </div>
+                        <img id="logoVisitanteImg" class="logo" src="" onerror="this.style.display='none'">
+                        <div class="info-equipo" style="align-items: flex-end;"><span id="nombreVisitante" class="nombre-siglas">VIS</span><div id="tarjetasVisitante" class="contenedor-tarjetas" style="justify-content: flex-end;"></div></div>
                     </div>
                 </div>
             </div>
-
-            <div id="letreroGol" class="letrero-gol">
-                <span class="texto-gol">¡GOOOL!</span>
-                <span id="equipoAnotador" class="nombre-equipo-gol">EQUIPO</span>
-            </div>
-
+            <div id="letreroGol" class="letrero-gol"><span class="texto-gol">¡GOOOL!</span><span id="equipoAnotador" class="nombre-equipo-gol">EQUIPO</span></div>
             <div id="graficoSustitucion" class="grafico-sustitucion">
                 <div class="sub-header">
-                    <span id="subTextoFallback" style="display: none; font-size: 16px; font-weight: bold; color: white; letter-spacing: 2px;">CAMBIO</span>
-                    <img id="subEquipoLogo" src="logos/default.png" style="height: 35px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));" 
-                         onerror="this.style.display='none'; document.getElementById('subTextoFallback').style.display='block';">
+                    <img id="subEquipoLogo" src="">
+                    <span id="subTextoFallback" style="display:none; color:white; font-size:12px; font-weight:bold;">CAMBIO</span>
                 </div>
                 <div class="sub-cuerpo">
-                    <div class="sub-jugador sub-sale">
-                        <span class="sub-icono">⬇</span>
-                        <span class="sub-numero" id="subNumeroSale">0</span>
-                        <span class="sub-nombre" id="subNombreSale">JUGADOR</span>
-                    </div>
+                    <div class="sub-jugador"><span style="color:#dc3545; margin-right:8px;">⬇</span><span class="sub-numero" id="subNumeroSale">0</span><span id="subNombreSale">JUGADOR</span></div>
                     <div class="sub-separador"></div>
-                    <div class="sub-jugador sub-entra">
-                        <span class="sub-icono">⬆</span>
-                        <span class="sub-numero" id="subNumeroEntra">0</span>
-                        <span class="sub-nombre" id="subNombreEntra">JUGADOR</span>
-                    </div>
+                    <div class="sub-jugador"><span style="color:#22c55e; margin-right:8px;">⬆</span><span class="sub-numero" id="subNumeroEntra">0</span><span id="subNombreEntra">JUGADOR</span></div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io('https://marcador-futbol.onrender.com');
-        let puntosActualesLocal = 0;
-        let puntosActualesVisitante = 0;
-        let temporizadorLetrero;
-        let temporizadorSub;
+        const socket = io();
         let estadoGlobal = {};
-        let primeraCarga = true; 
 
-        // --- CONFETTI ---
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        let particles = [];
-        let animationId;
-        
-        function launchConfetti(lado) {
-            particles = [];
-            cancelAnimationFrame(animationId); 
-            const colors = ['#ffffff', '#ffd700', '#ffcc00', '#00e5ff', '#ff0055', '#06d6a0'];
-            
-            let elementoOrigen = (lado === 'local') ? document.getElementById('cajaPuntosLocal') : document.getElementById('cajaPuntosVisitante');
-            let rect = elementoOrigen.getBoundingClientRect();
-            
-            let originX = rect.left + (rect.width / 2);
-            let originY = rect.top + (rect.height / 2);
-
-            for(let i=0; i<120; i++) {
-                particles.push({
-                    x: originX, 
-                    y: originY,
-                    r: Math.random() * 5 + 3,
-                    dx: Math.random() * 16 - 8,
-                    dy: Math.random() * -18 - 5,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    tilt: Math.floor(Math.random() * 10) - 10,
-                    tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
-                });
-            }
-            animateConfetti();
-        }
-
-        function animateConfetti() {
-            animationId = requestAnimationFrame(animateConfetti);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, index) => {
-                p.tiltAngle += p.tiltAngleInc;
-                p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2;
-                p.x += Math.sin(p.tiltAngle) * 2;
-                p.dy += 0.25; 
-                p.x += p.dx; p.y += p.dy;
-                ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.color;
-                ctx.moveTo(p.x + p.tilt + p.r, p.y); ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r); ctx.stroke();
-                if (p.y > canvas.height) particles.splice(index, 1);
-            });
-        }
-
-        function activarBrilloNumero(elemento) {
-            elemento.classList.remove('animacion-gol'); void elemento.offsetWidth; elemento.classList.add('animacion-gol');
-        }
-
-        function mostrarLetreroGol(nombreCompleto, lado) {
-            const letrero = document.getElementById('letreroGol');
-            document.getElementById('equipoAnotador').innerText = 'DE ' + (nombreCompleto || 'EQUIPO');
-            
-            letrero.classList.remove('lado-local', 'lado-visitante', 'mostrar');
-            if (lado === 'local') letrero.classList.add('lado-local');
-            else letrero.classList.add('lado-visitante');
-            
-            void letrero.offsetWidth;
-            letrero.classList.add('mostrar');
-
-            launchConfetti(lado);
-
-            clearTimeout(temporizadorLetrero);
-            temporizadorLetrero = setTimeout(() => { letrero.classList.remove('mostrar'); }, 6000);
-        }
-
-        function dibujarTarjetas(contenedorId, rojas) {
-            const contenedor = document.getElementById(contenedorId);
-            contenedor.innerHTML = ''; 
-            for(let i=0; i < rojas; i++) { 
-                let div = document.createElement('div'); div.className = 'tarjeta roja'; contenedor.appendChild(div); 
+        // Función inteligente para procesar logos (Base64, URL o archivo local)
+        function aplicarLogo(imgElement, valorLogo) {
+            imgElement.style.display = 'block';
+            if (!valorLogo || valorLogo === '') { imgElement.style.display = 'none'; return; }
+            if (valorLogo.startsWith('data:image') || valorLogo.startsWith('http')) {
+                imgElement.src = valorLogo;
+            } else {
+                imgElement.src = 'logos/' + valorLogo;
             }
         }
 
         socket.on('stateUpdate', (estado) => {
             estadoGlobal = estado;
             
-            const masterContainer = document.getElementById('master-visibility-container');
-            if(estado.showScoreboard === false) masterContainer.classList.add('oculto');
-            else masterContainer.classList.remove('oculto');
+            const mc = document.getElementById('master-visibility-container');
+            if(estado.showScoreboard === false) mc.classList.add('oculto'); else mc.classList.remove('oculto');
 
-            document.documentElement.style.setProperty('--color-global', estado.mainColor || '#1a1a2e');
+            document.documentElement.style.setProperty('--color-global', estado.mainColor);
             document.getElementById('nombreLocal').innerText = estado.homeName;
             document.getElementById('nombreVisitante').innerText = estado.awayName;
-            document.getElementById('logoLocalImg').src = 'logos/' + estado.homeLogo;
-            document.getElementById('logoLocalImg').style.display = 'block';
-            document.getElementById('logoVisitanteImg').src = 'logos/' + estado.awayLogo;
-            document.getElementById('logoVisitanteImg').style.display = 'block';
+            
+            // Aplicar logos con la nueva función
+            aplicarLogo(document.getElementById('logoLocalImg'), estado.homeLogo);
+            aplicarLogo(document.getElementById('logoVisitanteImg'), estado.awayLogo);
 
             document.getElementById('cajaPuntosLocal').style.backgroundColor = estado.homeColor;
             document.getElementById('cajaPuntosVisitante').style.backgroundColor = estado.awayColor;
-            
-            if(!primeraCarga) {
-                if (estado.homeScore > puntosActualesLocal) { 
-                    activarBrilloNumero(document.getElementById('puntosLocal')); mostrarLetreroGol(estado.homeFullName, 'local'); 
-                }
-                if (estado.awayScore > puntosActualesVisitante) { 
-                    activarBrilloNumero(document.getElementById('puntosVisitante')); mostrarLetreroGol(estado.awayFullName, 'visitante'); 
-                }
-            }
-
             document.getElementById('puntosLocal').innerText = estado.homeScore;
             document.getElementById('puntosVisitante').innerText = estado.awayScore;
-            puntosActualesLocal = estado.homeScore;
-            puntosActualesVisitante = estado.awayScore;
-            
-            primeraCarga = false; 
-
-            dibujarTarjetas('tarjetasLocal', estado.homeReds);
-            dibujarTarjetas('tarjetasVisitante', estado.awayReds);
-
-            const cajaAgregado = document.getElementById('tiempoAgregado');
-            if (estado.addedTime > 0) { cajaAgregado.innerText = '+' + estado.addedTime; cajaAgregado.style.display = 'block'; } 
-            else { cajaAgregado.style.display = 'none'; }
         });
 
-        socket.on('updateTimer', (tiempo) => {
-            const m = String(tiempo.minutes).padStart(2, '0');
-            const s = String(tiempo.seconds).padStart(2, '0');
-            document.getElementById('cronometro').innerText = m + ':' + s;
-        });
-
-        socket.on('showSubstitution', (data) => {
-            const isHome = data.team === 'home';
+        socket.on('updateTimer', (t) => { document.getElementById('cronometro').innerText = String(t.minutes).padStart(2,'0') + ':' + String(t.seconds).padStart(2,'0'); });
+        
+        let temporizadorSub;
+        socket.on('showSubstitution', (d) => {
+            const isHome = d.team === 'home';
+            const subLogo = document.getElementById('subEquipoLogo');
+            const fallback = document.getElementById('subTextoFallback');
+            const logoAUsar = isHome ? estadoGlobal.homeLogo : estadoGlobal.awayLogo;
             
-            const logoEl = document.getElementById('subEquipoLogo');
-            const fallbackEl = document.getElementById('subTextoFallback');
-            logoEl.style.display = 'block';
-            fallbackEl.style.display = 'none';
-            logoEl.src = 'logos/' + (isHome ? estadoGlobal.homeLogo : estadoGlobal.awayLogo);
+            if (logoAUsar && logoAUsar !== 'default.png') {
+                subLogo.style.display = 'block'; fallback.style.display = 'none';
+                aplicarLogo(subLogo, logoAUsar);
+            } else {
+                subLogo.style.display = 'none'; fallback.style.display = 'block';
+            }
 
-            document.getElementById('subNumeroSale').innerText = data.outNumber || '-';
-            document.getElementById('subNombreSale').innerText = data.outName || 'JUGADOR';
-            document.getElementById('subNumeroEntra').innerText = data.inNumber || '-';
-            document.getElementById('subNombreEntra').innerText = data.inName || 'JUGADOR';
-
-            const grafico = document.getElementById('graficoSustitucion');
-            grafico.classList.add('mostrar');
-            clearTimeout(temporizadorSub);
-            temporizadorSub = setTimeout(() => { grafico.classList.remove('mostrar'); }, 8000);
+            document.getElementById('subNumeroSale').innerText = d.outNumber || '-'; document.getElementById('subNombreSale').innerText = d.outName || 'JUGADOR';
+            document.getElementById('subNumeroEntra').innerText = d.inNumber || '-'; document.getElementById('subNombreEntra').innerText = d.inName || 'JUGADOR';
+            document.getElementById('graficoSustitucion').classList.add('mostrar');
+            clearTimeout(temporizadorSub); temporizadorSub = setTimeout(() => { document.getElementById('graficoSustitucion').classList.remove('mostrar'); }, 8000);
         });
     </script>
 </body>
