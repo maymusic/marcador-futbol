@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráfico de Marcador Premium</title>
+    <style>
+        :root { --color-global: #1a1a2e; }
+        body { margin: 0; padding: 0; background-color: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
+        #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); }
+        #master-visibility-container.oculto { opacity: 0; transform: translateY(-150px); }
+        .contenedor-relativo { position: absolute; top: 20px; left: 60px; display: inline-flex; flex-direction: column; }
+        .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; position: relative;}
+        
+        /* Ajustado a 75px para alinear perfectamente con el cronómetro */
+        .bloque-marcador { display: flex; align-items: stretch; height: 75px; background: linear-gradient(180deg, var(--color-global) 0%, #000000 100%); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
+        .equipo-lado { display: flex; align-items: center; padding: 0 25px; background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent); }
+        
+        /* Escudos más grandes y estilizados */
+        .logo { height: 50px; width: 50px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+        .info-equipo { display: flex; flex-direction: column; justify-content: center; line-height: 1; margin: 0 15px; }
+        
+        /* Nombre de las siglas más grande y con más impacto */
+        .nombre-siglas { font-size: 34px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 2px 3px 5px rgba(0,0,0,0.9); }
+        
+        /* Contador de goles gigante y profesional */
+        .puntuacion { padding: 0 30px; font-size: 46px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 45px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); transition: all 0.5s ease; position: relative; font-variant-numeric: tabular-nums; }
+        
+        .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 25px; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; }
+        .caja-agregado { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 2px 15px; font-size: 22px; font-weight: bold; border-radius: 0 0 8px 8px; box-shadow: 0 5px 10px rgba(0,0,0,0.5); display: none; border: 1px solid #900; border-top: none; }
+        
+        .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 5px; }
+        .tarjeta.roja { width: 12px; height: 8px; background-color: #ff0000; border-radius: 2px; box-shadow: 0 0 5px red; animation: latido 1.5s infinite; border: 1px solid darkred;}
+        @keyframes latido { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7;} 100% { transform: scale(1); opacity: 1; } }
+        
+        @keyframes brilloGol { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.3); filter: brightness(2.5); text-shadow: 0 0 30px white; } 100% { transform: scale(1); filter: brightness(1); } }
+        .animacion-gol { animation: brilloGol 0.8s ease-in-out; }
+        
+        .letrero-gol { position: absolute; top: 75px; padding: 6px 20px; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-top: none; opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 5; }
+        .letrero-gol.mostrar { opacity: 1; visibility: visible; }
+        .letrero-gol.lado-local { left: 20px; background: linear-gradient(90deg, var(--color-global) 0%, #111 100%);}
+        .letrero-gol.lado-local.mostrar { transform: translateY(12px); } .letrero-gol.lado-local:not(.mostrar) { transform: translateY(-50px); }
+        .letrero-gol.lado-visitante { right: 20px; flex-direction: row; background: linear-gradient(270deg, var(--color-global) 0%, #111 100%);}
+        .letrero-gol.lado-visitante.mostrar { transform: translateY(12px); } .letrero-gol.lado-visitante:not(.mostrar) { transform: translateY(-50px); }
+        
+        .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
+        .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
+        
+        /* Ajustado el espaciado para que no choque con la nueva altura */
+        .grafico-sustitucion { position: absolute; top: 100px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
+        .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
+        .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 25px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); width: 80px; }
+        .sub-cuerpo { display: flex; align-items: center; background: rgba(255,255,255,0.95); color: #111; padding: 5px 20px; }
+        .sub-jugador { display: flex; align-items: center; padding: 5px 10px; font-size: 20px; font-weight: 900; letter-spacing: 0.5px;}
+        .sub-icono { font-size: 18px; margin-right: 8px; }
+        .sub-sale .sub-icono { color: #dc3545; } .sub-entra .sub-icono { color: #28a745; }
+        .sub-numero { background: #111; color: white; padding: 4px 10px; border-radius: 4px; margin-right: 12px; font-size: 18px; text-align: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);}
+        .sub-separador { width: 2px; height: 35px; background: linear-gradient(180deg, transparent, #ccc, transparent); margin: 0 15px; }
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+    </style>
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+    <div id="master-visibility-container">
+        <div class="contenedor-relativo">
+            <div class="bloque-principal">
+                <div class="bloque-marcador" style="border-radius: 12px 0 0 12px;">
+                    <div class="equipo-lado">
+                        <img id="logoLocalImg" class="logo" src="" onerror="this.style.display='none'">
+                        <div class="info-equipo"><span id="nombreLocal" class="nombre-siglas">RAC</span><div id="tarjetasLocal" class="contenedor-tarjetas"></div></div>
+                    </div>
+                    <div class="puntuacion" id="cajaPuntosLocal"><span id="puntosLocal">0</span></div>
+                </div>
+                <div style="position: relative;">
+                    <div class="cronometro-caja" id="cronometro">00:00</div>
+                    <div class="caja-agregado" id="tiempoAgregado">+0</div>
+                </div>
+                <div class="bloque-marcador" style="border-radius: 0 12px 12px 0;">
+                    <div class="puntuacion" id="cajaPuntosVisitante"><span id="puntosVisitante">0</span></div>
+                    <div class="equipo-lado" style="flex-direction: row-reverse;">
+                        <img id="logoVisitanteImg" class="logo" src="" onerror="this.style.display='none'">
+                        <div class="info-equipo" style="align-items: flex-end;"><span id="nombreVisitante" class="nombre-siglas">VIS</span><div id="tarjetasVisitante" class="contenedor-tarjetas" style="justify-content: flex-end;"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div id="letreroGol" class="letrero-gol"><span class="texto-gol">¡GOOOL!</span><span id="equipoAnotador" class="nombre-equipo-gol">EQUIPO</span></div>
+            <div id="graficoSustitucion" class="grafico-sustitucion">
+                <div class="sub-header">
+                    <span id="subTextoFallback" style="display: none; font-size: 16px; font-weight: bold; color: white; letter-spacing: 2px;">CAMBIO</span>
+                    <img id="subEquipoLogo" src="" style="height: 35px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));" onerror="this.style.display='none'; document.getElementById('subTextoFallback').style.display='block';">
+                </div>
+                <div class="sub-cuerpo">
+                    <div class="sub-jugador sub-sale"><span class="sub-icono">⬇</span><span class="sub-numero" id="subNumeroSale">0</span><span class="sub-nombre" id="subNombreSale">JUGADOR</span></div>
+                    <div class="sub-separador"></div>
+                    <div class="sub-jugador sub-entra"><span class="sub-icono">⬆</span><span class="sub-numero" id="subNumeroEntra">0</span><span class="sub-nombre" id="subNombreEntra">JUGADOR</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let puntosActualesLocal = 0, puntosActualesVisitante = 0, temporizadorLetrero, temporizadorSub, estadoGlobal = {}, primeraCarga = true; 
+
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth || 1920; canvas.height = window.innerHeight || 1080; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        let particles = []; let animationId;
+        function launchConfetti(lado) {
+            try {
+                particles = []; cancelAnimationFrame(animationId); 
+                const colors = ['#ffffff', '#ffd700', '#ffcc00', '#00e5ff', '#ff0055', '#06d6a0'];
+                let el = (lado === 'local') ? document.getElementById('cajaPuntosLocal') : document.getElementById('cajaPuntosVisitante');
+                let rect = el.getBoundingClientRect();
+                let originX = rect.left + (rect.width / 2); let originY = rect.top + (rect.height / 2);
+                for(let i=0; i<120; i++) particles.push({ x: originX, y: originY, r: Math.random() * 5 + 3, dx: Math.random() * 16 - 8, dy: Math.random() * -18 - 5, color: colors[Math.floor(Math.random() * colors.length)], tilt: Math.floor(Math.random() * 10) - 10, tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05 });
+                animateConfetti();
+            } catch(e) { console.error(e); }
+        }
+        function animateConfetti() {
+            animationId = requestAnimationFrame(animateConfetti); ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                p.tiltAngle += p.tiltAngleInc; p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2; p.x += Math.sin(p.tiltAngle) * 2; p.dy += 0.25; p.x += p.dx; p.y += p.dy;
+                ctx.beginPath(); ctx.lineWidth = p.r; ctx.strokeStyle = p.color; ctx.moveTo(p.x + p.tilt + p.r, p.y); ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r); ctx.stroke();
+                if (p.y > canvas.height) particles.splice(index, 1);
+            });
+        }
+
+        function activarBrilloNumero(elemento) { elemento.classList.remove('animacion-gol'); void elemento.offsetWidth; elemento.classList.add('animacion-gol'); }
+        function mostrarLetreroGol(nombreCompleto, lado) {
+            try {
+                const letrero = document.getElementById('letreroGol');
+                document.getElementById('equipoAnotador').innerText = 'DE ' + (nombreCompleto || 'EQUIPO');
+                letrero.classList.remove('lado-local', 'lado-visitante', 'mostrar');
+                if (lado === 'local') letrero.classList.add('lado-local'); else letrero.classList.add('lado-visitante');
+                void letrero.offsetWidth; letrero.classList.add('mostrar');
+                launchConfetti(lado);
+                clearTimeout(temporizadorLetrero); temporizadorLetrero = setTimeout(() => { letrero.classList.remove('mostrar'); }, 6000);
+            } catch(e){}
+        }
+
+        function dibujarTarjetas(contenedorId, rojas) {
+            try { const contenedor = document.getElementById(contenedorId); contenedor.innerHTML = ''; for(let i=0; i < rojas; i++) { let div = document.createElement('div'); div.className = 'tarjeta roja'; contenedor.appendChild(div); } } catch(e){}
+        }
+        function aplicarLogo(imgElement, valorLogo) {
+            try {
+                if (!valorLogo || valorLogo === '') { imgElement.style.display = 'none'; return; }
+                imgElement.style.display = 'block';
+                if (valorLogo.startsWith('data:image')) { imgElement.src = valorLogo; } else { imgElement.src = 'logos/' + valorLogo; }
+            } catch(e){}
+        }
+
+        socket.on('stateUpdate', (estado) => {
+            try {
+                estadoGlobal = estado;
+                const mc = document.getElementById('master-visibility-container');
+                if(estado.showScoreboard === false) mc.classList.add('oculto'); else mc.classList.remove('oculto');
+                document.documentElement.style.setProperty('--color-global', estado.mainColor || '#1a1a2e');
+                document.getElementById('nombreLocal').innerText = estado.homeName; document.getElementById('nombreVisitante').innerText = estado.awayName;
+                aplicarLogo(document.getElementById('logoLocalImg'), estado.homeLogo); aplicarLogo(document.getElementById('logoVisitanteImg'), estado.awayLogo);
+                document.getElementById('cajaPuntosLocal').style.backgroundColor = estado.homeColor || '#0044cc'; document.getElementById('cajaPuntosVisitante').style.backgroundColor = estado.awayColor || '#cc0000';
+                
+                if(!primeraCarga) {
+                    if (estado.homeScore > puntosActualesLocal) { activarBrilloNumero(document.getElementById('puntosLocal')); mostrarLetreroGol(estado.homeFullName, 'local'); }
+                    if (estado.awayScore > puntosActualesVisitante) { activarBrilloNumero(document.getElementById('puntosVisitante')); mostrarLetreroGol(estado.awayFullName, 'visitante'); }
+                }
+                document.getElementById('puntosLocal').innerText = estado.homeScore; document.getElementById('puntosVisitante').innerText = estado.awayScore;
+                puntosActualesLocal = estado.homeScore; puntosActualesVisitante = estado.awayScore; primeraCarga = false; 
+                dibujarTarjetas('tarjetasLocal', estado.homeReds); dibujarTarjetas('tarjetasVisitante', estado.awayReds);
+                const cajaAgregado = document.getElementById('tiempoAgregado');
+                if (estado.addedTime > 0) { cajaAgregado.innerText = '+' + estado.addedTime; cajaAgregado.style.display = 'block'; } else { cajaAgregado.style.display = 'none'; }
+            } catch(e){}
+        });
+
+        socket.on('updateTimer', (tiempo) => {
+            try { const m = String(tiempo.minutes).padStart(2, '0'); const s = String(tiempo.seconds).padStart(2, '0'); document.getElementById('cronometro').innerText = m + ':' + s; } catch(e){}
+        });
+
+        socket.on('showSubstitution', (data) => {
+            try {
+                const logoEl = document.getElementById('subEquipoLogo'); const fallbackEl = document.getElementById('subTextoFallback');
+                const logoAUsar = data.team === 'home' ? estadoGlobal.homeLogo : estadoGlobal.awayLogo;
+                if (logoAUsar && logoAUsar !== '') { logoEl.style.display = 'block'; fallbackEl.style.display = 'none'; aplicarLogo(logoEl, logoAUsar); } 
+                else { logoEl.style.display = 'none'; fallbackEl.style.display = 'block'; }
+                document.getElementById('subNumeroSale').innerText = data.outNumber || '-'; document.getElementById('subNombreSale').innerText = data.outName || 'JUGADOR';
+                document.getElementById('subNumeroEntra').innerText = data.inNumber || '-'; document.getElementById('subNombreEntra').innerText = data.inName || 'JUGADOR';
+                const grafico = document.getElementById('graficoSustitucion'); grafico.classList.add('mostrar');
+                clearTimeout(temporizadorSub); temporizadorSub = setTimeout(() => { grafico.classList.remove('mostrar'); }, 8000);
+            } catch(e){}
+        });
+    </script>
+</body>
+</html>
