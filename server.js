@@ -4,7 +4,12 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// ¡AQUÍ ESTÁ LA SOLUCIÓN! Aumentamos el límite de datos a 50 Megabytes 
+// para que los escudos pesados no desconecten el panel.
+const io = new Server(server, {
+    maxHttpBufferSize: 5e7 
+});
 
 app.use(express.static('public'));
 
