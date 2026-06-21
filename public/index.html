@@ -6,9 +6,14 @@
     <style>
         :root { --color-global: #1a1a2e; }
         body { margin: 0; padding: 0; background-color: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
-        #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); }
+        #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); margin-top: 40px; /* Margen para que el global pueda salir por arriba */}
         #master-visibility-container.oculto { opacity: 0; transform: translateY(-150px); }
         .contenedor-relativo { position: absolute; top: 20px; left: 60px; display: inline-flex; flex-direction: column; }
+        
+        /* CAJA DEL GLOBAL (Escondida detrás del marcador principal y sube cuando se activa) */
+        .caja-global { position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, #111 0%, #222 100%); color: #ffd700; padding: 4px 30px; font-size: 22px; font-weight: 900; border-radius: 10px 10px 0 0; border: 1px solid rgba(255,255,255,0.2); border-bottom: none; letter-spacing: 1.5px; opacity: 0; z-index: 1; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+        .caja-global.mostrar { opacity: 1; transform: translateX(-50%) translateY(-100%); }
+
         .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; position: relative;}
         
         .bloque-marcador { display: flex; align-items: stretch; height: 75px; background: linear-gradient(180deg, var(--color-global) 0%, #000000 100%); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
@@ -20,9 +25,9 @@
         
         .puntuacion { padding: 0 30px; font-size: 46px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 45px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); transition: all 0.5s ease; position: relative; font-variant-numeric: tabular-nums; }
         
-        .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 25px; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; }
+        /* CRONÓMETRO GIGANTE */
+        .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 35px; font-size: 52px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; font-variant-numeric: tabular-nums;}
         
-        /* TIEMPO EXTRA AGRANDADO Y CORREGIDO */
         .caja-agregado { position: absolute; bottom: -38px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 4px 22px; font-size: 28px; font-weight: 900; border-radius: 0 0 8px 8px; box-shadow: 0 8px 15px rgba(0,0,0,0.5); display: none; border: 2px solid #b02a37; border-top: none; letter-spacing: 1px; text-shadow: 1px 2px 4px rgba(0,0,0,0.6); z-index: 11; }
         
         .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 5px; }
@@ -42,7 +47,6 @@
         .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
         .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
         
-        /* Separado a 115px para dar espacio limpio al tiempo extra grande */
         .grafico-sustitucion { position: absolute; top: 115px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
         .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
         .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 25px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); width: 80px; }
@@ -60,18 +64,20 @@
     <div id="master-visibility-container">
         <div class="contenedor-relativo">
             <div class="bloque-principal">
-                <div class="bloque-marcador" style="border-radius: 12px 0 0 12px;">
+                <div class="caja-global" id="cajaGlobal">GLOBAL: 0 - 0</div>
+
+                <div class="bloque-marcador" style="border-radius: 12px 0 0 12px; z-index: 10;">
                     <div class="equipo-lado">
                         <img id="logoLocalImg" class="logo" src="" onerror="this.style.display='none'">
                         <div class="info-equipo"><span id="nombreLocal" class="nombre-siglas">RAC</span><div id="tarjetasLocal" class="contenedor-tarjetas"></div></div>
                     </div>
                     <div class="puntuacion" id="cajaPuntosLocal"><span id="puntosLocal">0</span></div>
                 </div>
-                <div style="position: relative;">
+                <div style="position: relative; z-index: 10;">
                     <div class="cronometro-caja" id="cronometro">00:00</div>
                     <div class="caja-agregado" id="tiempoAgregado">+0</div>
                 </div>
-                <div class="bloque-marcador" style="border-radius: 0 12px 12px 0;">
+                <div class="bloque-marcador" style="border-radius: 0 12px 12px 0; z-index: 10;">
                     <div class="puntuacion" id="cajaPuntosVisitante"><span id="puntosVisitante">0</span></div>
                     <div class="equipo-lado" style="flex-direction: row-reverse;">
                         <img id="logoVisitanteImg" class="logo" src="" onerror="this.style.display='none'">
@@ -94,7 +100,7 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
         let puntosActualesLocal = 0, puntosActualesVisitante = 0, temporizadorLetrero, temporizadorSub, estadoGlobal = {}, primeraCarga = true; 
@@ -145,7 +151,7 @@
             try {
                 if (!valorLogo || valorLogo === '') { imgElement.style.display = 'none'; return; }
                 imgElement.style.display = 'block';
-                if (valorLogo.startsWith('data:image')) { imgElement.src = valorLogo; } else { imgElement.src = 'logos/' + valorLogo; }
+                if (valorLogo.startsWith('data:image') || valorLogo.startsWith('http')) { imgElement.src = valorLogo; } else { imgElement.src = 'logos/' + valorLogo; }
             } catch(e){}
         }
 
@@ -165,9 +171,21 @@
                 }
                 document.getElementById('puntosLocal').innerText = estado.homeScore; document.getElementById('puntosVisitante').innerText = estado.awayScore;
                 puntosActualesLocal = estado.homeScore; puntosActualesVisitante = estado.awayScore; primeraCarga = false; 
+                
                 dibujarTarjetas('tarjetasLocal', estado.homeReds); dibujarTarjetas('tarjetasVisitante', estado.awayReds);
+                
                 const cajaAgregado = document.getElementById('tiempoAgregado');
                 if (estado.addedTime > 0) { cajaAgregado.innerText = '+' + estado.addedTime; cajaAgregado.style.display = 'block'; } else { cajaAgregado.style.display = 'none'; }
+
+                // MARCADOR GLOBAL
+                const cajaGlobal = document.getElementById('cajaGlobal');
+                if (estado.showGlobal) {
+                    cajaGlobal.innerText = `GLOBAL: ${estado.homeGlobalScore || 0} - ${estado.awayGlobalScore || 0}`;
+                    cajaGlobal.classList.add('mostrar');
+                } else {
+                    cajaGlobal.classList.remove('mostrar');
+                }
+
             } catch(e){}
         });
 

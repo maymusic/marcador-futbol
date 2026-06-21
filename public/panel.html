@@ -10,7 +10,7 @@
         .dashboard { width: 100%; max-width: 900px; box-sizing: border-box; }
         .header-title { text-align: center; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; color: #cbd5e1; font-size: 24px; }
         
-        .master-toggle { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
+        .master-toggle { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
         .btn-toggle { padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; transition: 0.3s; color: white; width: 48%; }
         .btn-on { background-color: var(--success); box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
         .btn-off { background-color: #64748b; }
@@ -43,7 +43,6 @@
         .timer-adjust { background: #0f172a; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; box-sizing: border-box;}
         h4 { margin: 0 0 8px 0; font-size: 14px; text-align: center;}
 
-        /* REGLAS MÁGICAS RESPONSIVAS PARA CELULAR Y OBS DOCK */
         @media (max-width: 650px) {
             body { padding: 8px; }
             .grid-2 { grid-template-columns: 1fr; gap: 15px; }
@@ -72,6 +71,12 @@
                     <button class="btn-toggle btn-on" onclick="toggleScoreboard(true)">👁️ Mostrar</button>
                 </div>
             </div>
+            <div style="width: 100%; margin-top: 15px; background: rgba(234, 179, 8, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(234, 179, 8, 0.3); text-align: center;">
+                <label style="color: #ffd700; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <input type="checkbox" id="showGlobalToggle" onchange="toggleGlobal()" style="width: 20px; height: 20px; margin: 0;">
+                    🏆 MOSTRAR MARCADOR GLOBAL
+                </label>
+            </div>
         </div>
 
         <div class="grid-2">
@@ -89,7 +94,17 @@
                     <button class="btn-action bg-red" onclick="changeScore('home', -1)">-1</button>
                     <button class="btn-action bg-green" onclick="changeScore('home', 1)">⚽ +1 GOL</button>
                 </div>
-                <div class="cards-box">
+                
+                <div style="border-top: 1px dashed #475569; margin-top: 15px; padding-top: 15px;">
+                    <h4 style="color: #ffd700;">GLOBAL</h4>
+                    <div class="score-display" id="homeGlobalDisplay" style="font-size: 40px; color: #ffd700;">0</div>
+                    <div class="btn-row">
+                        <button class="btn-action bg-gray" onclick="changeScore('homeGlobal', -1)">-1</button>
+                        <button class="btn-action" style="background: #eab308; color: black;" onclick="changeScore('homeGlobal', 1)">+1</button>
+                    </div>
+                </div>
+
+                <div class="cards-box" style="margin-top: 15px;">
                     <span style="font-size: 16px;">🟥 ROJAS</span> 
                     <button class="btn-action bg-gray" style="flex: 0; padding: 3px 10px;" onclick="changeCards('home', -1)">-</button>
                     <span class="card-num" id="homeRedsDisplay">0</span>
@@ -111,7 +126,17 @@
                     <button class="btn-action bg-red" onclick="changeScore('away', -1)">-1</button>
                     <button class="btn-action bg-green" onclick="changeScore('away', 1)">⚽ +1 GOL</button>
                 </div>
-                <div class="cards-box">
+
+                <div style="border-top: 1px dashed #475569; margin-top: 15px; padding-top: 15px;">
+                    <h4 style="color: #ffd700;">GLOBAL</h4>
+                    <div class="score-display" id="awayGlobalDisplay" style="font-size: 40px; color: #ffd700;">0</div>
+                    <div class="btn-row">
+                        <button class="btn-action bg-gray" onclick="changeScore('awayGlobal', -1)">-1</button>
+                        <button class="btn-action" style="background: #eab308; color: black;" onclick="changeScore('awayGlobal', 1)">+1</button>
+                    </div>
+                </div>
+
+                <div class="cards-box" style="margin-top: 15px;">
                     <span style="font-size: 16px;">🟥 ROJAS</span> 
                     <button class="btn-action bg-gray" style="flex: 0; padding: 3px 10px;" onclick="changeCards('away', -1)">-</button>
                     <span class="card-num" id="awayRedsDisplay">0</span>
@@ -173,7 +198,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let currentState = { homeScore: 0, awayScore: 0, homeReds: 0, awayReds: 0 };
+        let currentState = { homeScore: 0, awayScore: 0, homeGlobalScore: 0, awayGlobalScore: 0, homeReds: 0, awayReds: 0 };
         let primeraCarga = true;
         let homeLogoBase64 = '';
         let awayLogoBase64 = '';
@@ -198,19 +223,18 @@
             reader.readAsDataURL(file);
         }
 
-        document.getElementById('homeLogoFile').addEventListener('change', e => {
-            if(e.target.files[0]) compressImage(e.target.files[0], b64 => homeLogoBase64 = b64);
-        });
-        document.getElementById('awayLogoFile').addEventListener('change', e => {
-            if(e.target.files[0]) compressImage(e.target.files[0], b64 => awayLogoBase64 = b64);
-        });
+        document.getElementById('homeLogoFile').addEventListener('change', e => { if(e.target.files[0]) compressImage(e.target.files[0], b64 => homeLogoBase64 = b64); });
+        document.getElementById('awayLogoFile').addEventListener('change', e => { if(e.target.files[0]) compressImage(e.target.files[0], b64 => awayLogoBase64 = b64); });
 
         socket.on('stateUpdate', (state) => {
             currentState = state;
             document.getElementById('homeScoreDisplay').innerText = state.homeScore;
             document.getElementById('awayScoreDisplay').innerText = state.awayScore;
+            document.getElementById('homeGlobalDisplay').innerText = state.homeGlobalScore || 0;
+            document.getElementById('awayGlobalDisplay').innerText = state.awayGlobalScore || 0;
             document.getElementById('homeRedsDisplay').innerText = state.homeReds;
             document.getElementById('awayRedsDisplay').innerText = state.awayReds;
+            document.getElementById('showGlobalToggle').checked = state.showGlobal || false;
 
             const statusIndicator = document.getElementById('onAirStatus');
             if (state.showScoreboard) { statusIndicator.innerText = "EN PANTALLA 🟢"; statusIndicator.className = "status-indicator status-on"; } 
@@ -235,10 +259,25 @@
 
         function toggleScoreboard(isVisible) { socket.emit('toggleScoreboard', isVisible); }
 
+        function toggleGlobal() {
+            socket.emit('updateScore', {
+                homeScore: currentState.homeScore, awayScore: currentState.awayScore,
+                homeGlobalScore: currentState.homeGlobalScore || 0, awayGlobalScore: currentState.awayGlobalScore || 0,
+                showGlobal: document.getElementById('showGlobalToggle').checked
+            });
+        }
+
         function changeScore(team, amount) {
             if (team === 'home') currentState.homeScore = Math.max(0, currentState.homeScore + amount);
             if (team === 'away') currentState.awayScore = Math.max(0, currentState.awayScore + amount);
-            socket.emit('updateScore', { homeScore: currentState.homeScore, awayScore: currentState.awayScore });
+            if (team === 'homeGlobal') currentState.homeGlobalScore = Math.max(0, (currentState.homeGlobalScore || 0) + amount);
+            if (team === 'awayGlobal') currentState.awayGlobalScore = Math.max(0, (currentState.awayGlobalScore || 0) + amount);
+            
+            socket.emit('updateScore', { 
+                homeScore: currentState.homeScore, awayScore: currentState.awayScore,
+                homeGlobalScore: currentState.homeGlobalScore || 0, awayGlobalScore: currentState.awayGlobalScore || 0,
+                showGlobal: document.getElementById('showGlobalToggle').checked
+            });
         }
 
         function changeCards(team, amount) {
@@ -259,7 +298,6 @@
             };
             if(homeLogoBase64) data.homeLogo = homeLogoBase64;
             if(awayLogoBase64) data.awayLogo = awayLogoBase64;
-
             socket.emit('updateTeamInfo', data);
         }
 

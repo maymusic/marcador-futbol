@@ -16,6 +16,7 @@ let gameState = {
     homeName: 'RAC', homeFullName: 'RACING DE VERACRUZ',
     awayName: 'VIS', awayFullName: 'VISITANTE FC',
     homeScore: 0, awayScore: 0,
+    homeGlobalScore: 0, awayGlobalScore: 0, showGlobal: false,
     homeColor: '#0044cc', awayColor: '#cc0000',
     homeLogo: '', awayLogo: '',
     homeReds: 0, awayReds: 0,
@@ -46,7 +47,16 @@ io.on('connection', (socket) => {
     socket.emit('updateTimer', { minutes: gameState.minutes, seconds: gameState.seconds });
 
     socket.on('toggleScoreboard', (v) => { gameState.showScoreboard = v; io.emit('stateUpdate', gameState); });
-    socket.on('updateScore', (d) => { gameState.homeScore = d.homeScore; gameState.awayScore = d.awayScore; io.emit('stateUpdate', gameState); });
+    
+    socket.on('updateScore', (d) => { 
+        if(d.homeScore !== undefined) gameState.homeScore = d.homeScore; 
+        if(d.awayScore !== undefined) gameState.awayScore = d.awayScore; 
+        if(d.homeGlobalScore !== undefined) gameState.homeGlobalScore = d.homeGlobalScore;
+        if(d.awayGlobalScore !== undefined) gameState.awayGlobalScore = d.awayGlobalScore;
+        if(d.showGlobal !== undefined) gameState.showGlobal = d.showGlobal;
+        io.emit('stateUpdate', gameState); 
+    });
+
     socket.on('updateTeamInfo', (d) => {
         gameState.mainColor = d.mainColor; gameState.homeName = d.homeName; gameState.homeFullName = d.homeFullName;
         gameState.awayName = d.awayName; gameState.awayFullName = d.awayFullName;
@@ -55,6 +65,7 @@ io.on('connection', (socket) => {
         if(d.awayLogo) gameState.awayLogo = d.awayLogo;
         io.emit('stateUpdate', gameState);
     });
+
     socket.on('updateAddedTime', (t) => { gameState.addedTime = t; io.emit('stateUpdate', gameState); });
     socket.on('updateCards', (d) => { gameState.homeReds = d.homeReds; gameState.awayReds = d.awayReds; io.emit('stateUpdate', gameState); });
     socket.on('triggerSubstitution', (d) => { io.emit('showSubstitution', d); });
