@@ -22,16 +22,12 @@
         .puntuacion { padding: 0 25px; font-size: 34px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 35px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5); transition: all 0.5s ease; position: relative; }
 
         .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 25px; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; }
-        
-        /* CAJA DE TIEMPO EXTRA */
         .caja-agregado { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 2px 15px; font-size: 22px; font-weight: bold; border-radius: 0 0 8px 8px; box-shadow: 0 5px 10px rgba(0,0,0,0.5); display: none; border: 1px solid #900; border-top: none; }
 
-        /* TARJETAS ROJAS */
         .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 3px; }
         .tarjeta.roja { width: 12px; height: 8px; background-color: #ff0000; border-radius: 2px; box-shadow: 0 0 5px red; animation: latido 1.5s infinite; border: 1px solid darkred;}
         @keyframes latido { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7;} 100% { transform: scale(1); opacity: 1; } }
 
-        /* ANIMACIÓN DE GOL Y CONFETI */
         @keyframes brilloGol { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.4); filter: brightness(2.5); text-shadow: 0 0 25px white; } 100% { transform: scale(1); filter: brightness(1); } }
         .animacion-gol { animation: brilloGol 0.8s ease-in-out; }
 
@@ -47,7 +43,7 @@
         .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
         .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
 
-        /* SUSTITUCIONES: Ahora top: 90px para tener una separación limpia y profesional */
+        /* SUSTITUCIONES: Ajuste a top: 90px */
         .grafico-sustitucion { position: absolute; top: 90px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
         .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
         
@@ -128,7 +124,7 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
         let puntosActualesLocal = 0;
@@ -150,19 +146,20 @@
             particles = []; cancelAnimationFrame(animationId); 
             const colors = ['#ffffff', '#ffd700', '#ffcc00', '#00e5ff', '#ff0055', '#06d6a0'];
             let elementoOrigen = (lado === 'local') ? document.getElementById('cajaPuntosLocal') : document.getElementById('cajaPuntosVisitante');
-            let rect = elementoOrigen.getBoundingClientRect();
             
-            // Origen exacto de la caja de números
-            let originX = rect.left + (rect.width / 2) || (lado === 'local' ? 200 : 600); 
-            let originY = rect.top + (rect.height / 2) || 100;
+            try {
+                let rect = elementoOrigen.getBoundingClientRect();
+                let originX = rect.left + (rect.width / 2); 
+                let originY = rect.top + (rect.height / 2);
 
-            for(let i=0; i<120; i++) {
-                particles.push({
-                    x: originX, y: originY, r: Math.random() * 5 + 3, dx: Math.random() * 16 - 8, dy: Math.random() * -18 - 5,
-                    color: colors[Math.floor(Math.random() * colors.length)], tilt: Math.floor(Math.random() * 10) - 10, tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
-                });
-            }
-            animateConfetti();
+                for(let i=0; i<120; i++) {
+                    particles.push({
+                        x: originX, y: originY, r: Math.random() * 5 + 3, dx: Math.random() * 16 - 8, dy: Math.random() * -18 - 5,
+                        color: colors[Math.floor(Math.random() * colors.length)], tilt: Math.floor(Math.random() * 10) - 10, tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
+                    });
+                }
+                animateConfetti();
+            } catch (e) { console.error("Error lanzando confeti", e); }
         }
 
         function animateConfetti() {
@@ -175,80 +172,16 @@
             });
         }
 
-        // Animación de Brillo al anotar
         function activarBrilloNumero(elemento) {
             elemento.classList.remove('animacion-gol'); void elemento.offsetWidth; elemento.classList.add('animacion-gol');
         }
 
-        // Bajar el letrero de ¡GOOOL!
         function mostrarLetreroGol(nombreCompleto, lado) {
-            const letrero = document.getElementById('letreroGol');
-            document.getElementById('equipoAnotador').innerText = 'DE ' + (nombreCompleto || 'EQUIPO');
-            letrero.classList.remove('lado-local', 'lado-visitante', 'mostrar');
-            if (lado === 'local') letrero.classList.add('lado-local'); else letrero.classList.add('lado-visitante');
-            void letrero.offsetWidth; letrero.classList.add('mostrar');
-            launchConfetti(lado);
-            clearTimeout(temporizadorLetrero); temporizadorLetrero = setTimeout(() => { letrero.classList.remove('mostrar'); }, 6000);
-        }
-
-        // Tarjetas rojas visuales
-        function dibujarTarjetas(contenedorId, rojas) {
-            const contenedor = document.getElementById(contenedorId); contenedor.innerHTML = ''; 
-            for(let i=0; i < rojas; i++) { let div = document.createElement('div'); div.className = 'tarjeta roja'; contenedor.appendChild(div); }
-        }
-
-        // Renderizar el logo sin importar si es de la web o convertido
-        function aplicarLogo(imgElement, valorLogo) {
-            if (!valorLogo || valorLogo === '') { imgElement.style.display = 'none'; return; }
-            imgElement.style.display = 'block';
-            if (valorLogo.startsWith('data:image') || valorLogo.startsWith('http')) { imgElement.src = valorLogo; } 
-            else { imgElement.src = 'logos/' + valorLogo; }
-        }
-
-        socket.on('stateUpdate', (estado) => {
-            estadoGlobal = estado;
-            
-            const masterContainer = document.getElementById('master-visibility-container');
-            if(estado.showScoreboard === false) masterContainer.classList.add('oculto'); else masterContainer.classList.remove('oculto');
-
-            document.documentElement.style.setProperty('--color-global', estado.mainColor || '#1a1a2e');
-            document.getElementById('nombreLocal').innerText = estado.homeName; document.getElementById('nombreVisitante').innerText = estado.awayName;
-            
-            aplicarLogo(document.getElementById('logoLocalImg'), estado.homeLogo);
-            aplicarLogo(document.getElementById('logoVisitanteImg'), estado.awayLogo);
-
-            document.getElementById('cajaPuntosLocal').style.backgroundColor = estado.homeColor; document.getElementById('cajaPuntosVisitante').style.backgroundColor = estado.awayColor;
-            
-            // Lógica para detectar GOL y lanzar confeti
-            if(!primeraCarga) {
-                if (estado.homeScore > puntosActualesLocal) { activarBrilloNumero(document.getElementById('puntosLocal')); mostrarLetreroGol(estado.homeFullName, 'local'); }
-                if (estado.awayScore > puntosActualesVisitante) { activarBrilloNumero(document.getElementById('puntosVisitante')); mostrarLetreroGol(estado.awayFullName, 'visitante'); }
-            }
-
-            document.getElementById('puntosLocal').innerText = estado.homeScore; document.getElementById('puntosVisitante').innerText = estado.awayScore;
-            puntosActualesLocal = estado.homeScore; puntosActualesVisitante = estado.awayScore; primeraCarga = false; 
-
-            // Tarjetas y Tiempo Agregado
-            dibujarTarjetas('tarjetasLocal', estado.homeReds); dibujarTarjetas('tarjetasVisitante', estado.awayReds);
-
-            const cajaAgregado = document.getElementById('tiempoAgregado');
-            if (estado.addedTime > 0) { cajaAgregado.innerText = '+' + estado.addedTime; cajaAgregado.style.display = 'block'; } else { cajaAgregado.style.display = 'none'; }
-        });
-
-        socket.on('updateTimer', (tiempo) => {
-            const m = String(tiempo.minutes).padStart(2, '0'); const s = String(tiempo.seconds).padStart(2, '0');
-            document.getElementById('cronometro').innerText = m + ':' + s;
-        });
-
-        socket.on('showSubstitution', (data) => {
-            const isHome = data.team === 'home';
-            const logoEl = document.getElementById('subEquipoLogo'); const fallbackEl = document.getElementById('subTextoFallback');
-            const logoAUsar = isHome ? estadoGlobal.homeLogo : estadoGlobal.awayLogo;
-
-            if (logoAUsar && logoAUsar !== '') {
-                logoEl.style.display = 'block'; fallbackEl.style.display = 'none'; aplicarLogo(logoEl, logoAUsar);
-            } else {
-                logoEl.style.display = 'none'; fallbackEl.style.display = 'block';
-            }
-
-            document.getElementById('subNumeroSale').innerText = data.outNumber || '-'; document.getElementById
+            try {
+                const letrero = document.getElementById('letreroGol');
+                document.getElementById('equipoAnotador').innerText = 'DE ' + (nombreCompleto || 'EQUIPO');
+                letrero.classList.remove('lado-local', 'lado-visitante', 'mostrar');
+                if (lado === 'local') letrero.classList.add('lado-local'); else letrero.classList.add('lado-visitante');
+                void letrero.offsetWidth; letrero.classList.add('mostrar');
+                launchConfetti(lado);
+                clearTimeout(temporizadorLetrero); temporizadorLetr
