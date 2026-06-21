@@ -8,7 +8,6 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .dashboard { width: 100%; max-width: 900px; }
         .header-title { text-align: center; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; color: #cbd5e1; }
-        
         .master-toggle { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
         .btn-toggle { padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; transition: 0.3s; color: white; width: 45%; }
         .btn-on { background-color: var(--success); box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
@@ -16,27 +15,21 @@
         .status-indicator { font-size: 18px; font-weight: bold; padding: 10px 20px; border-radius: 6px; background: #000;}
         .status-on { color: var(--success); border: 1px solid var(--success);}
         .status-off { color: #94a3b8; border: 1px solid #475569;}
-
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #334155;}
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        
         h3 { margin-top: 0; text-align: center; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;}
         input[type="text"], input[type="number"], select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px;}
         input[type="color"] { width: 100%; height: 45px; border: none; border-radius: 6px; cursor: pointer; background: transparent; margin-bottom: 12px;}
         input[type="file"] { width: 100%; padding: 8px; margin-bottom: 12px; background: #334155; border-radius: 6px; color: white; }
-        
         .score-display { font-size: 70px; font-weight: bold; text-align: center; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 15px rgba(255,255,255,0.1);}
         button { cursor: pointer; border: none; color: white; transition: 0.2s; }
         button:active { transform: scale(0.95); }
         .btn-row { display: flex; gap: 10px; margin-bottom: 15px;}
         .btn-action { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px;}
         .bg-red { background-color: var(--danger); } .bg-green { background-color: var(--success); } .bg-blue { background-color: var(--accent); } .bg-yellow { background-color: var(--warning); color: black;} .bg-gray { background-color: #475569; }
-
         .update-global-btn { width: 100%; padding: 18px; font-size: 18px; font-weight: bold; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);}
-
         .cards-box { display: flex; justify-content: center; align-items: center; gap: 15px; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155;}
         .card-num { font-size: 22px; font-weight: bold; width: 30px; text-align: center;}
-        
         .timer-display { font-size: 50px; font-weight: bold; text-align: center; margin-bottom: 20px; font-variant-numeric: tabular-nums;}
         .flex-center { display: flex; justify-content: center; align-items: center; gap: 10px; }
         .timer-adjust { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #334155;}
@@ -45,7 +38,6 @@
 <body>
     <div class="dashboard">
         <h2 class="header-title">💻 DASHBOARD DE TRANSMISIÓN</h2>
-
         <div class="master-toggle">
             <div style="width: 45%;">
                 <label style="font-weight: bold; color: #94a3b8; display: block; margin-bottom: 5px;">🎨 Color Global</label>
@@ -54,8 +46,8 @@
             <div style="display: flex; flex-direction: column; align-items: center; width: 45%;">
                 <span id="onAirStatus" class="status-indicator status-on">EN PANTALLA 🟢</span>
                 <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
-                    <button class="btn-toggle btn-off" id="btnOcultar" onclick="toggleScoreboard(false)">🙈 Ocultar</button>
-                    <button class="btn-toggle btn-on" id="btnMostrar" onclick="toggleScoreboard(true)">👁️ Mostrar</button>
+                    <button class="btn-toggle btn-off" onclick="toggleScoreboard(false)">🙈 Ocultar</button>
+                    <button class="btn-toggle btn-on" onclick="toggleScoreboard(true)">👁️ Mostrar</button>
                 </div>
             </div>
         </div>
@@ -65,10 +57,8 @@
                 <h3>Local</h3>
                 <input type="text" id="homeName" maxlength="3" placeholder="Siglas (RAC)" style="font-weight: bold; text-align: center; font-size: 20px;">
                 <input type="text" id="homeFullName" placeholder="Nombre Completo (Ej: RACING)">
-                
                 <label style="font-size: 14px; color: #94a3b8;">Subir Logo (PNG):</label>
                 <input type="file" id="homeLogoFile" accept="image/png">
-                
                 <input type="color" id="homeColor" value="#0044cc">
                 
                 <div class="score-display" id="homeScoreDisplay">0</div>
@@ -88,10 +78,8 @@
                 <h3>Visitante</h3>
                 <input type="text" id="awayName" maxlength="3" placeholder="Siglas (VIS)" style="font-weight: bold; text-align: center; font-size: 20px;">
                 <input type="text" id="awayFullName" placeholder="Nombre Completo (Ej: AMÉRICA)">
-                
                 <label style="font-size: 14px; color: #94a3b8;">Subir Logo (PNG):</label>
                 <input type="file" id="awayLogoFile" accept="image/png">
-                
                 <input type="color" id="awayColor" value="#cc0000">
                 
                 <div class="score-display" id="awayScoreDisplay">0</div>
@@ -166,15 +154,32 @@
         let homeLogoBase64 = '';
         let awayLogoBase64 = '';
 
-        document.getElementById('homeLogoFile').addEventListener('change', function(e) {
+        // FUNCIÓN MÁGICA: Comprime la imagen a 150x150 píxeles para que no se congele el servidor
+        function compressImage(file, callback) {
             const reader = new FileReader();
-            reader.onload = function(event) { homeLogoBase64 = event.target.result; };
-            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 150;
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/png')); 
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('homeLogoFile').addEventListener('change', e => {
+            if(e.target.files[0]) compressImage(e.target.files[0], b64 => homeLogoBase64 = b64);
         });
-        document.getElementById('awayLogoFile').addEventListener('change', function(e) {
-            const reader = new FileReader();
-            reader.onload = function(event) { awayLogoBase64 = event.target.result; };
-            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        document.getElementById('awayLogoFile').addEventListener('change', e => {
+            if(e.target.files[0]) compressImage(e.target.files[0], b64 => awayLogoBase64 = b64);
         });
 
         socket.on('stateUpdate', (state) => {
@@ -185,11 +190,8 @@
             document.getElementById('awayRedsDisplay').innerText = state.awayReds;
 
             const statusIndicator = document.getElementById('onAirStatus');
-            if (state.showScoreboard) {
-                statusIndicator.innerText = "EN PANTALLA 🟢"; statusIndicator.className = "status-indicator status-on";
-            } else {
-                statusIndicator.innerText = "OCULTO 🔴"; statusIndicator.className = "status-indicator status-off";
-            }
+            if (state.showScoreboard) { statusIndicator.innerText = "EN PANTALLA 🟢"; statusIndicator.className = "status-indicator status-on"; } 
+            else { statusIndicator.innerText = "OCULTO 🔴"; statusIndicator.className = "status-indicator status-off"; }
 
             if (primeraCarga) {
                 document.getElementById('homeName').value = state.homeName || '';
@@ -204,8 +206,7 @@
         });
 
         socket.on('updateTimer', (time) => {
-            const m = String(time.minutes).padStart(2, '0');
-            const s = String(time.seconds).padStart(2, '0');
+            const m = String(time.minutes).padStart(2, '0'); const s = String(time.seconds).padStart(2, '0');
             document.getElementById('timerDisplay').innerText = `${m}:${s}`;
         });
 
@@ -246,10 +247,8 @@
         function launchSubstitution() {
             socket.emit('triggerSubstitution', {
                 team: document.getElementById('subTeamSelect').value,
-                outNumber: document.getElementById('outPlayerNumber').value,
-                outName: document.getElementById('outPlayerName').value.toUpperCase(),
-                inNumber: document.getElementById('inPlayerNumber').value,
-                inName: document.getElementById('inPlayerName').value.toUpperCase()
+                outNumber: document.getElementById('outPlayerNumber').value, outName: document.getElementById('outPlayerName').value.toUpperCase(),
+                inNumber: document.getElementById('inPlayerNumber').value, inName: document.getElementById('inPlayerName').value.toUpperCase()
             });
             document.getElementById('outPlayerNumber').value = ''; document.getElementById('outPlayerName').value = '';
             document.getElementById('inPlayerNumber').value = ''; document.getElementById('inPlayerName').value = '';
