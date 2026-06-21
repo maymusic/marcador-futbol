@@ -6,28 +6,25 @@
     <style>
         :root { --color-global: #1a1a2e; }
         body { margin: 0; padding: 0; background-color: transparent; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
-        #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); margin-top: 40px; /* Margen para que el global pueda salir por arriba */}
+        #master-visibility-container { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 1; transform: translateY(0); margin-top: 40px; }
         #master-visibility-container.oculto { opacity: 0; transform: translateY(-150px); }
         .contenedor-relativo { position: absolute; top: 20px; left: 60px; display: inline-flex; flex-direction: column; }
         
-        /* CAJA DEL GLOBAL (Escondida detrás del marcador principal y sube cuando se activa) */
+        /* CAJA DEL GLOBAL */
         .caja-global { position: absolute; top: 0; left: 50%; transform: translateX(-50%); background: linear-gradient(180deg, #111 0%, #222 100%); color: #ffd700; padding: 4px 30px; font-size: 22px; font-weight: 900; border-radius: 10px 10px 0 0; border: 1px solid rgba(255,255,255,0.2); border-bottom: none; letter-spacing: 1.5px; opacity: 0; z-index: 1; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
         .caja-global.mostrar { opacity: 1; transform: translateX(-50%) translateY(-100%); }
 
         .bloque-principal { display: flex; align-items: center; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); z-index: 10; position: relative;}
-        
         .bloque-marcador { display: flex; align-items: stretch; height: 75px; background: linear-gradient(180deg, var(--color-global) 0%, #000000 100%); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 2px 5px rgba(255,255,255,0.1); }
         .equipo-lado { display: flex; align-items: center; padding: 0 25px; background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent); }
         
         .logo { height: 50px; width: 50px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
         .info-equipo { display: flex; flex-direction: column; justify-content: center; line-height: 1; margin: 0 15px; }
         .nombre-siglas { font-size: 34px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 2px 3px 5px rgba(0,0,0,0.9); }
-        
         .puntuacion { padding: 0 30px; font-size: 46px; font-weight: 900; display: flex; align-items: center; justify-content: center; min-width: 45px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 20px rgba(0,0,0,0.6); transition: all 0.5s ease; position: relative; font-variant-numeric: tabular-nums; }
         
-        /* CRONÓMETRO GIGANTE */
+        /* CRONÓMETRO */
         .cronometro-caja { background: linear-gradient(180deg, #f0f0f0 0%, #dcdcdc 100%); color: #111; padding: 0 35px; font-size: 52px; font-weight: 900; display: flex; align-items: center; justify-content: center; height: 75px; border-radius: 8px; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 2px 2px white; border: 2px solid #ccc; letter-spacing: 1px; font-variant-numeric: tabular-nums;}
-        
         .caja-agregado { position: absolute; bottom: -38px; left: 50%; transform: translateX(-50%); background-color: #dc3545; color: white; padding: 4px 22px; font-size: 28px; font-weight: 900; border-radius: 0 0 8px 8px; box-shadow: 0 8px 15px rgba(0,0,0,0.5); display: none; border: 2px solid #b02a37; border-top: none; letter-spacing: 1px; text-shadow: 1px 2px 4px rgba(0,0,0,0.6); z-index: 11; }
         
         .contenedor-tarjetas { display: flex; gap: 4px; height: 8px; margin-top: 5px; }
@@ -37,25 +34,35 @@
         @keyframes brilloGol { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.3); filter: brightness(2.5); text-shadow: 0 0 30px white; } 100% { transform: scale(1); filter: brightness(1); } }
         .animacion-gol { animation: brilloGol 0.8s ease-in-out; }
         
-        .letrero-gol { position: absolute; top: 75px; padding: 6px 20px; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-top: none; opacity: 0; visibility: hidden; transition: all 0.5s ease; z-index: 5; }
+        /* LETRERO DE GOL MÁS GRANDE Y PROMINENTE */
+        .letrero-gol { position: absolute; top: 75px; padding: 12px 35px; border-radius: 0 0 12px 12px; display: flex; align-items: center; gap: 20px; box-shadow: 0 12px 25px rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.25); border-top: none; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5; }
         .letrero-gol.mostrar { opacity: 1; visibility: visible; }
         .letrero-gol.lado-local { left: 20px; background: linear-gradient(90deg, var(--color-global) 0%, #111 100%);}
-        .letrero-gol.lado-local.mostrar { transform: translateY(12px); } .letrero-gol.lado-local:not(.mostrar) { transform: translateY(-50px); }
+        .letrero-gol.lado-local.mostrar { transform: translateY(15px); } .letrero-gol.lado-local:not(.mostrar) { transform: translateY(-50px); }
         .letrero-gol.lado-visitante { right: 20px; flex-direction: row; background: linear-gradient(270deg, var(--color-global) 0%, #111 100%);}
-        .letrero-gol.lado-visitante.mostrar { transform: translateY(12px); } .letrero-gol.lado-visitante:not(.mostrar) { transform: translateY(-50px); }
+        .letrero-gol.lado-visitante.mostrar { transform: translateY(15px); } .letrero-gol.lado-visitante:not(.mostrar) { transform: translateY(-50px); }
         
-        .texto-gol { font-size: 20px; font-weight: 900; font-style: italic; text-shadow: 2px 2px 0 #000; color: #fff;}
-        .nombre-equipo-gol { font-size: 18px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);}
+        .texto-gol { font-size: 34px; font-weight: 900; font-style: italic; text-shadow: 2px 3px 0 #000; color: #fff; letter-spacing: 1px; }
+        .nombre-equipo-gol { font-size: 26px; font-weight: bold; background: rgba(0,0,0,0.7); padding: 6px 18px; border-radius: 6px; box-shadow: inset 0 0 8px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.15);}
         
-        .grafico-sustitucion { position: absolute; top: 115px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
+        /* GRÁFICO DE SUSTITUCIÓN MÁS GRANDE Y REUBICADO PARA DAR ESPACIO */
+        .grafico-sustitucion { position: absolute; top: 125px; left: 0; display: flex; background: linear-gradient(180deg, var(--color-global) 0%, #000 100%); border-radius: 10px; box-shadow: 0 12px 35px rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.25); overflow: hidden; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
         .grafico-sustitucion.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
-        .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 25px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); width: 80px; }
-        .sub-cuerpo { display: flex; align-items: center; background: rgba(255,255,255,0.95); color: #111; padding: 5px 20px; }
-        .sub-jugador { display: flex; align-items: center; padding: 5px 10px; font-size: 20px; font-weight: 900; letter-spacing: 0.5px;}
-        .sub-icono { font-size: 18px; margin-right: 8px; }
+        
+        /* CONTENEDOR DEL LOGO EN EL CAMBIO MÁS ANCHO */
+        .sub-header { display: flex; align-items: center; justify-content: center; padding: 0 30px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.15); width: 100px; }
+        /* ESCUDOS DE CAMBIOS BASTANTE MÁS GRANDES */
+        .sub-header img { height: 55px; width: 55px; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)); }
+        
+        .sub-cuerpo { display: flex; align-items: center; background: rgba(255,255,255,0.96); color: #111; padding: 12px 25px; }
+        .sub-jugador { display: flex; align-items: center; padding: 5px 10px; font-size: 26px; font-weight: 900; letter-spacing: 0.5px;}
+        .sub-icono { font-size: 24px; margin-right: 10px; }
         .sub-sale .sub-icono { color: #dc3545; } .sub-entra .sub-icono { color: #28a745; }
-        .sub-numero { background: #111; color: white; padding: 4px 10px; border-radius: 4px; margin-right: 12px; font-size: 18px; text-align: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);}
-        .sub-separador { width: 2px; height: 35px; background: linear-gradient(180deg, transparent, #ccc, transparent); margin: 0 15px; }
+        
+        /* DORSALES MÁS GRANDES DENTRO DEL CAMBIO */
+        .sub-numero { background: #111; color: white; padding: 6px 14px; border-radius: 6px; margin-right: 15px; font-size: 24px; font-weight: 900; text-align: center; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); font-variant-numeric: tabular-nums;}
+        .sub-separador { width: 2px; height: 45px; background: linear-gradient(180deg, transparent, #bbb, transparent); margin: 0 20px; }
+        
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
     </style>
 </head>
@@ -85,11 +92,13 @@
                     </div>
                 </div>
             </div>
+            
             <div id="letreroGol" class="letrero-gol"><span class="texto-gol">¡GOOOL!</span><span id="equipoAnotador" class="nombre-equipo-gol">EQUIPO</span></div>
+            
             <div id="graficoSustitucion" class="grafico-sustitucion">
                 <div class="sub-header">
                     <span id="subTextoFallback" style="display: none; font-size: 16px; font-weight: bold; color: white; letter-spacing: 2px;">CAMBIO</span>
-                    <img id="subEquipoLogo" src="" style="height: 35px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));" onerror="this.style.display='none'; document.getElementById('subTextoFallback').style.display='block';">
+                    <img id="subEquipoLogo" src="" onerror="this.style.display='none'; document.getElementById('subTextoFallback').style.display='block';">
                 </div>
                 <div class="sub-cuerpo">
                     <div class="sub-jugador sub-sale"><span class="sub-icono">⬇</span><span class="sub-numero" id="subNumeroSale">0</span><span class="sub-nombre" id="subNombreSale">JUGADOR</span></div>
@@ -100,7 +109,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let puntosActualesLocal = 0, puntosActualesVisitante = 0, temporizadorLetrero, temporizadorSub, estadoGlobal = {}, primeraCarga = true; 
@@ -151,7 +160,7 @@
             try {
                 if (!valorLogo || valorLogo === '') { imgElement.style.display = 'none'; return; }
                 imgElement.style.display = 'block';
-                if (valorLogo.startsWith('data:image') || valorLogo.startsWith('http')) { imgElement.src = valorLogo; } else { imgElement.src = 'logos/' + valorLogo; }
+                if (valorLogo.startsWith('data:image')) { imgElement.src = valorLogo; } else { imgElement.src = 'logos/' + valorLogo; }
             } catch(e){}
         }
 
@@ -171,13 +180,10 @@
                 }
                 document.getElementById('puntosLocal').innerText = estado.homeScore; document.getElementById('puntosVisitante').innerText = estado.awayScore;
                 puntosActualesLocal = estado.homeScore; puntosActualesVisitante = estado.awayScore; primeraCarga = false; 
-                
                 dibujarTarjetas('tarjetasLocal', estado.homeReds); dibujarTarjetas('tarjetasVisitante', estado.awayReds);
-                
                 const cajaAgregado = document.getElementById('tiempoAgregado');
                 if (estado.addedTime > 0) { cajaAgregado.innerText = '+' + estado.addedTime; cajaAgregado.style.display = 'block'; } else { cajaAgregado.style.display = 'none'; }
 
-                // MARCADOR GLOBAL
                 const cajaGlobal = document.getElementById('cajaGlobal');
                 if (estado.showGlobal) {
                     cajaGlobal.innerText = `GLOBAL: ${estado.homeGlobalScore || 0} - ${estado.awayGlobalScore || 0}`;
@@ -185,7 +191,6 @@
                 } else {
                     cajaGlobal.classList.remove('mostrar');
                 }
-
             } catch(e){}
         });
 
